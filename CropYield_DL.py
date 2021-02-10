@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Feb  8 17:08:07 2021
-
-@author: Chu Tianjia
-"""
-
 import os
 import openpyxl
 import numpy as np
