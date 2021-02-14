@@ -1,4 +1,5 @@
 import os
+import glob
 import openpyxl
 import numpy as np
 import pandas as pd
@@ -91,7 +92,8 @@ def BuildModel(Norm):
                             # layers.BatchNormalization(),
                             layers.Dropout(DropoutValue[6]),
                             
-                            layers.Dense(1)])
+                            layers.Dense(units=1,
+                                         activation=OutputLayerActMethod)])
     Model.compile(loss=LossMethod,
                   optimizer=tf.keras.optimizers.Adam(learning_rate=LearnRate,decay=LearnDecay))
     return Model
@@ -106,6 +108,15 @@ def LossPlot(History):
     plt.ylabel('Error')
     plt.legend()
     plt.grid(True)
+
+# Optimize the model based on optimal epoch.
+def BestEpochIntoModel(Path,Model):
+    EpochFile=glob.glob(Path+'/*')
+    BestEpoch=max(EpochFile,key=os.path.getmtime)
+    Model.load_weights(BestEpoch)
+    Model.compile(loss=LossMethod,
+                  optimizer=BestEpochOptMethod)
+    return Model
 
 # Draw Test image.
 def TestPlot(TestY,TestPrediction):
@@ -148,7 +159,8 @@ def WriteAccuracy(*WriteVar):
 # Input parameters.
 DataPath="G:/CropYield/03_DL/00_Data/AllDataAll.csv"
 ModelPath="G:/CropYield/03_DL/02_DNNModle"
-CheckPointName="G:/CropYield/03_DL/02_DNNModle/Weights/Weights_{epoch:03d}_{val_loss:.4f}.hdf5"
+CheckPointPath="G:/CropYield/03_DL/02_DNNModle/Weights"
+CheckPointName=CheckPointPath+"/Weights_{epoch:03d}_{val_loss:.4f}.hdf5"
 ParameterPath="G:/CropYield/03_DL/03_OtherResult/ParameterResult.xlsx"
 TrainFrac=0.8
 RandomSeed=np.random.randint(low=21,high=22)
@@ -157,11 +169,13 @@ HiddenLayer=[64,128,256,512,512,1024,1024]
 RegularizationFactor=0.0001
 ActivationMethod='relu'
 DropoutValue=[0.5,0.5,0.5,0.3,0.3,0.3,0.2]
+OutputLayerActMethod='linear'
 LossMethod='mean_absolute_error'
 LearnRate=0.005
-LearnDecay=5e-4
-FitEpoch=200
+LearnDecay=0.0005
+FitEpoch=500
 ValFrac=0.2
+BestEpochOptMethod='adam'
 
 # Fetch and divide data.
 MyData=pd.read_csv(DataPath,names=['EVI0610','EVI0626','EVI0712','EVI0728','EVI0813','EVI0829',
@@ -194,7 +208,7 @@ Normalizer.adapt(np.array(TrainX))
 # Delete the model result from the last run.
 DeleteOldModel(ModelPath)
 
-# Find and save optimal epoch.
+# Find and save optimal epochs.
 CallBack=CheckPoint(CheckPointName)
 
 # Build DNN regression model.
@@ -210,6 +224,9 @@ DNNHistory=DNNModel.fit(TrainX,
 # Draw error image.
 LossPlot(DNNHistory)
 
+# Optimize the model based on optimal epoch.
+DNNModel=BestEpochIntoModel(CheckPointPath,DNNModel)
+
 # Predict test set data.
 TestPrediction=DNNModel.predict(TestX).flatten()
 
@@ -224,5 +241,5 @@ PearsonR,R2,RMSE=AccuracyResult[0],AccuracyResult[1],AccuracyResult[2]
 DNNModel.save(ModelPath)
 WriteAccuracy(ParameterPath,PearsonR,R2,RMSE,TrainFrac,RandomSeed,CheckPointMethod,
               ','.join('%s' %i for i in HiddenLayer),RegularizationFactor,
-              ActivationMethod,','.join('%s' %i for i in DropoutValue),
-              LossMethod,LearnRate,LearnDecay,FitEpoch,ValFrac)
+              ActivationMethod,','.join('%s' %i for i in DropoutValue),OutputLayerActMethod,
+              LossMethod,LearnRate,LearnDecay,FitEpoch,ValFrac,BestEpochOptMethod)
