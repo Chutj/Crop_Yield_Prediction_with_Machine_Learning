@@ -49,43 +49,57 @@ def BuildModel(Norm):
                             
                             layers.Dense(HiddenLayer[0],
                                          kernel_regularizer=regularizers.l2(RegularizationFactor),
-                                         activation=ActivationMethod),
+                                         # activation=ActivationMethod
+                                         ),
+                            layers.LeakyReLU(),
                             layers.BatchNormalization(),
                             layers.Dropout(DropoutValue[0]),
                             
                             layers.Dense(HiddenLayer[1],
                                          kernel_regularizer=regularizers.l2(RegularizationFactor),
-                                         activation=ActivationMethod),
+                                         # activation=ActivationMethod
+                                         ),
+                            layers.LeakyReLU(),
                             layers.BatchNormalization(),
                             layers.Dropout(DropoutValue[1]),
                             
                             layers.Dense(HiddenLayer[2],
                                          kernel_regularizer=regularizers.l2(RegularizationFactor),
-                                         activation=ActivationMethod),
+                                         # activation=ActivationMethod
+                                         ),
+                            layers.LeakyReLU(),
                             layers.BatchNormalization(),
                             layers.Dropout(DropoutValue[2]),
                             
                             layers.Dense(HiddenLayer[3],
                                          kernel_regularizer=regularizers.l2(RegularizationFactor),
-                                         activation=ActivationMethod),
+                                         # activation=ActivationMethod
+                                         ),
+                            layers.LeakyReLU(),
                             layers.BatchNormalization(),
                             layers.Dropout(DropoutValue[3]),
                             
                             layers.Dense(HiddenLayer[4],
                                          kernel_regularizer=regularizers.l2(RegularizationFactor),
-                                         activation=ActivationMethod),
+                                         # activation=ActivationMethod
+                                         ),
+                            layers.LeakyReLU(),
                             layers.BatchNormalization(),
                             layers.Dropout(DropoutValue[4]),
                             
                             layers.Dense(HiddenLayer[5],
                                          kernel_regularizer=regularizers.l2(RegularizationFactor),
-                                         activation=ActivationMethod),
+                                         # activation=ActivationMethod
+                                         ),
+                            layers.LeakyReLU(),
                             layers.BatchNormalization(),
                             layers.Dropout(DropoutValue[5]),
                             
                             layers.Dense(HiddenLayer[6],
                                          kernel_regularizer=regularizers.l2(RegularizationFactor),
-                                         activation=ActivationMethod),
+                                         # activation=ActivationMethod
+                                         ),
+                            layers.LeakyReLU(),
                             # If batch normalization is set in the last hidden layer, the error image
                             # will show a trend of first stable and then decline; otherwise, it will 
                             # decline and then stable.
@@ -125,7 +139,7 @@ def TestPlot(TestY,TestPrediction):
     plt.scatter(TestY,TestPrediction)
     plt.xlabel('True Values')
     plt.ylabel('Predictions')
-    Lims=[0,13000]
+    Lims=[0,10000]
     plt.xlim(Lims)
     plt.ylim(Lims)
     plt.plot(Lims,Lims)
@@ -174,6 +188,7 @@ LossMethod='mean_absolute_error'
 LearnRate=0.005
 LearnDecay=0.0005
 FitEpoch=500
+BatchSize=9999
 ValFrac=0.2
 BestEpochOptMethod='adam'
 
@@ -217,6 +232,7 @@ DNNModel.summary()
 DNNHistory=DNNModel.fit(TrainX,
                         TrainY,
                         epochs=FitEpoch,
+                        # batch_size=BatchSize,
                         verbose=1,
                         callbacks=CallBack,
                         validation_split=ValFrac)
@@ -242,4 +258,4 @@ DNNModel.save(ModelPath)
 WriteAccuracy(ParameterPath,PearsonR,R2,RMSE,TrainFrac,RandomSeed,CheckPointMethod,
               ','.join('%s' %i for i in HiddenLayer),RegularizationFactor,
               ActivationMethod,','.join('%s' %i for i in DropoutValue),OutputLayerActMethod,
-              LossMethod,LearnRate,LearnDecay,FitEpoch,ValFrac,BestEpochOptMethod)
+              LossMethod,LearnRate,LearnDecay,FitEpoch,BatchSize,ValFrac,BestEpochOptMethod)
