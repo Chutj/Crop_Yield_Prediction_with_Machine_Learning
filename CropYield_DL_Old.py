@@ -98,17 +98,17 @@ elif VarKind==54:
     MyDataPath="G:/CropYield/03_DL/00_Data/AllDataAll.csv"
     MyEvalSavePath="G:/CropYield/03_DL/03_OtherResult/EvalResult54.xlsx"
 
-Dropout=0.2
-HiddenLayer=[64,128,256,512,512,1024]
-TrainStep=3000
-TrainBatchSize=90
+Dropout=0.3
+HiddenLayer=[64,128,256,512,512,1024,1024,1024]
+TrainStep=5000
+TrainBatchSize=110
 TestSize=0.2
 RandomSeed=np.random.randint(low=21,high=22)
 OptMethod='tf.optimizers.Adam()'
 ActFun='tf.nn.relu'
 
 RMSE=9999
-while RMSE>593:
+while RMSE>516:
     DeleteOldModel(MyModelPath)
     AllX,AllY=LoadData(MyDataPath,VarKind)
     TrainX,TestX,TrainY,TestY=train_test_split(AllX,AllY,test_size=TestSize,random_state=RandomSeed)
